@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#2b2823">
+<title>Золотая лихорадка</title>
+<style>
+:root{--bg:#171512;--p1:#2b2823;--p2:#3a352d;--txt:#f4ecd8;--dim:#a99f8a;--gold:#ffd93b;--grn:#4fa82e;--red:#e5533d;--cy:#4fe3d9}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;background:#0f0e0c;color:var(--txt);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;overscroll-behavior:none}
+body{display:flex;justify-content:center}
+button{font:inherit;color:inherit;cursor:pointer}
+img{image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;user-select:none}
+.hidden{display:none!important}
+#app{width:100%;max-width:560px;height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--bg);position:relative;user-select:none;-webkit-user-select:none}
+header{padding:8px 10px 7px;background:var(--p1);border-bottom:3px solid #000;box-shadow:inset 0 -3px 0 #ffffff12}
+.toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:.5px;color:var(--gold);text-shadow:2px 2px 0 #000;font-size:15px}
+.logo img{width:24px;height:24px}
+.mini{background:var(--p2);border:3px solid #000;padding:2px 9px;font-size:12px;font-weight:700;box-shadow:inset -2px -2px 0 #0006,inset 2px 2px 0 #ffffff22}
+#res{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.chip{display:flex;align-items:center;gap:4px;background:#0006;border:2px solid #000;padding:3px 5px;min-width:0}
+.chip img{width:18px;height:18px;flex:none}
+.chip b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.bump{animation:bump .25s}
+#lv{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px;color:var(--dim);font-weight:700}
+.bar{flex:1;height:10px;background:#000;border:2px solid #000;position:relative;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(#8fe35a,#4fa82e);width:0}
+.bar.big{height:16px;flex:none;width:100%}
+.bar.time i{background:linear-gradient(#ffe45a,#e0a81c)}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px;-webkit-overflow-scrolling:touch}
+nav{display:grid;grid-template-columns:repeat(5,1fr);background:var(--p1);border-top:3px solid #000;padding-bottom:env(safe-area-inset-bottom)}
+nav button{background:none;border:0;padding:6px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--dim);font-weight:700}
+nav button img{width:26px;height:26px;opacity:.65}
+nav button.on{color:var(--gold);background:#ffffff0d;box-shadow:inset 0 3px 0 var(--gold)}
+nav button.on img{opacity:1}
+.card{background:var(--p1);border:3px solid #000;padding:9px;margin-bottom:9px;box-shadow:inset -3px -3px 0 #0005,inset 3px 3px 0 #ffffff14}
+.card h3{margin:0 0 7px;font-size:13px;letter-spacing:.6px;color:var(--gold);text-transform:uppercase;text-shadow:1px 1px 0 #000}
+.btn{background:var(--grn);border:3px solid #000;padding:7px 10px;font-weight:800;font-size:13px;box-shadow:inset -3px -3px 0 #0004,inset 3px 3px 0 #ffffff40;text-shadow:1px 1px 0 #0006;display:inline-flex;align-items:center;gap:5px;justify-content:center;color:#fff}
+.btn:active:not(:disabled){transform:translateY(2px)}
+.btn:disabled{background:#4a463e;color:#8b8472;cursor:not-allowed;box-shadow:inset -3px -3px 0 #0004,inset 3px 3px 0 #ffffff14;text-shadow:none}
+.btn.gold{background:#d9a21b}.btn.red{background:#c0392b}.btn.blue{background:#2f7fc4}
+.btn img{width:16px;height:16px}
+.big-btn{font-size:18px;padding:12px 22px;margin-top:8px}
+.btnrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.center{text-align:center}.small{font-size:12px}.dim{color:var(--dim)}.mt{margin-top:8px}
+/* mine */
+#hud{background:var(--p1);border:3px solid #000;padding:8px 9px;box-shadow:inset -3px -3px 0 #0005,inset 3px 3px 0 #ffffff14}
+.hudrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+#tm{font-size:24px;font-weight:900;color:var(--gold);text-shadow:2px 2px 0 #000;font-variant-numeric:tabular-nums}
+#cmb{font-size:13px;font-weight:900;color:#8fe35a;text-shadow:1px 1px 0 #000}
+#gotrow{display:flex;gap:6px;margin-top:6px;min-height:22px;flex-wrap:wrap;font-size:12px;font-weight:800}
+#gotrow span{display:flex;align-items:center;gap:3px;background:#0006;border:2px solid #000;padding:1px 6px}
+#gotrow img{width:15px;height:15px}
+#field{position:relative;height:clamp(300px,50vh,480px);border:4px solid #000;overflow:hidden;background-size:64px 64px;image-rendering:pixelated;box-shadow:inset 0 0 50px #0006;touch-action:none;margin:9px 0}
+#blocks,#fx,#deco{position:absolute;inset:0}
+#deco{pointer-events:none}
+#deco img{position:absolute;width:26px;height:26px;opacity:.95}
+#fx{pointer-events:none;z-index:5;overflow:hidden}
+#flash{position:absolute;inset:0;background:#ff5a2a;opacity:0;pointer-events:none;z-index:6}
+.blk{position:absolute;cursor:pointer;touch-action:none;animation:pop .18s ease-out}
+.blk .bimg,.blk .crack{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.blk .bimg{filter:drop-shadow(0 4px 0 #0007)}
+.blk .crack{display:none}
+.blk .lt{position:absolute;left:3px;right:3px;bottom:-8px;height:4px;background:#000a;pointer-events:none}
+.blk .lt i{display:block;height:100%;width:100%;background:#8fe35a}
+.blk.hit{animation:hit .12s}
+.blk.breaking{animation:brk .2s forwards;pointer-events:none}
+.blk.tnt .bimg{animation:tntblink .5s steps(2) infinite}
+.pt{position:absolute;pointer-events:none}
+.ft{position:absolute;pointer-events:none;font-weight:900;font-size:14px;text-shadow:2px 2px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;display:flex;flex-direction:column;gap:1px;white-space:nowrap}
+.ft span{display:flex;align-items:center;gap:3px}
+.ft img{width:16px;height:16px}
+.ft.bad{color:#ff7d6a;font-size:20px}
+#overlay{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:#000a;padding:10px}
+.ovp{background:var(--p1);border:4px solid #000;padding:14px;max-width:340px;width:100%;text-align:center;box-shadow:inset -4px -4px 0 #0005,inset 4px 4px 0 #ffffff18}
+.ovp h2{margin:0 0 6px;color:var(--gold);text-shadow:2px 2px 0 #000;font-size:21px}
+.ovp p{margin:6px 0;font-size:12.5px;color:#d8cfb8;line-height:1.4}
+.chk{display:flex;align-items:center;gap:7px;justify-content:center;font-size:12.5px;font-weight:700;margin:9px 0 2px;color:var(--gold)}
+.chk input{width:18px;height:18px;accent-color:#d9a21b}
+.got{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.got div{display:flex;align-items:center;gap:6px;background:#0006;border:2px solid #000;padding:5px 7px;font-weight:800;font-size:13px;text-align:left}
+.got img{width:20px;height:20px}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.lg{display:flex;align-items:center;gap:7px;background:#0004;border:2px solid #000;padding:5px}
+.lg img{width:30px;height:30px;flex:none}
+.lg b{display:block;font-size:12px}.lg small{display:block;font-size:10.5px;color:var(--dim);line-height:1.25}
+/* rows */
+.row{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:2px solid #0004}
+.row:first-of-type{border-top:0}
+.row img.ic{width:34px;height:34px;flex:none}
+.row .tx{flex:1;min-width:0}
+.row .tx b{display:block;font-size:13px}
+.row .tx small{display:block;color:var(--dim);font-size:11px;line-height:1.3}
+.row.cur{background:#ffd93b14}
+.tag{font-size:11px;font-weight:800;padding:3px 7px;background:#0006;border:2px solid #000;color:var(--gold);white-space:nowrap}
+.tag.dim{color:var(--dim)}
+.pips{display:flex;gap:2px;margin-top:4px}.pips i{width:7px;height:7px;background:#000;border:1px solid #000}.pips i.on{background:var(--gold)}
+.row .btn{padding:6px 8px;font-size:12px;white-space:nowrap}
+/* market */
+.mtop{display:flex;align-items:center;gap:9px}
+.mtop img.ic{width:34px;height:34px;flex:none}
+.mname{flex:1;min-width:0}.mname b{display:block;font-size:13px}.mname small{color:var(--dim);font-size:11px}
+.mprice{text-align:right}.mprice b{font-size:17px;color:var(--gold);display:block}.mprice small{font-size:11px;font-weight:800}
+.spark{width:78px;height:30px;flex:none;background:#0005;border:2px solid #000}
+.mbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px}
+.mbtns .btn{padding:5px 2px;font-size:11px;flex-direction:column;gap:0;line-height:1.2}
+.mbtns .btn small{font-size:10px;font-weight:600;opacity:.9}
+.up{color:#7fe05a}.dn{color:#ff7d6a}
+.banner{background:#3a2f12;border:3px solid #000;padding:8px 10px;font-size:12.5px;font-weight:800;color:var(--gold);margin-bottom:9px;box-shadow:inset 0 0 0 2px #ffd93b55}
+/* furnace */
+.furn{position:relative;width:128px;height:128px;margin:0 auto 8px}
+.furn .base{width:128px;height:128px;display:block}
+.furn .flame{position:absolute;left:40px;top:34px;width:48px;height:48px;opacity:0}
+.furn.on .flame{opacity:1;animation:flick .35s steps(2) infinite}
+.stat{display:flex;justify-content:space-between;padding:5px 0;border-top:2px solid #0004;font-size:13px}
+.stat:first-of-type{border-top:0}.stat b{color:var(--gold)}
+.ach{opacity:.45}.ach.done{opacity:1}
+textarea{width:100%;height:70px;background:#0007;color:var(--txt);border:3px solid #000;font-size:11px;padding:6px;margin-top:6px;font-family:monospace}
+#toasts{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:6px;pointer-events:none;width:min(92vw,420px)}
+.toast{background:#2b2823f5;border:3px solid #000;padding:7px 10px;font-size:12.5px;font-weight:700;display:flex;gap:8px;align-items:center;animation:tin .25s;box-shadow:inset 0 0 0 2px #ffd93b55}
+.toast img{width:22px;height:22px}
+@keyframes tin{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes hit{0%{transform:scale(1)}40%{transform:scale(.86) rotate(-4deg)}100%{transform:scale(1)}}
+@keyframes brk{to{transform:scale(1.35);opacity:0}}
+@keyframes tntblink{50%{filter:brightness(1.9)}}
+@keyframes bump{50%{transform:scale(1.2)}}
+@keyframes flick{50%{transform:scale(1.08) translateY(-1px);filter:brightness(1.25)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="toprow">
+      <div class="logo"><img id="logoimg" alt=""><span>ЗОЛОТАЯ ЛИХОРАДКА</span></div>
+      <button class="mini" id="sndBtn">♪ ВКЛ</button>
+    </div>
+    <div id="res"></div>
+    <div id="lv"><span id="lvTxt">Ур. 1</span><div class="bar"><i id="xpFill"></i></div><span id="xpTxt"></span></div>
+  </header>
+  <main>
+    <section id="tab-mine" class="tab">
+      <div id="hud">
+        <div class="hudrow"><div id="tm">30.0</div><div id="cmb"></div></div>
+        <div class="bar big time"><i id="tbar" style="width:100%"></i></div>
+        <div id="gotrow"></div>
+      </div>
+      <div id="field">
+        <div id="deco"></div>
+        <div id="blocks"></div>
+        <div id="fx"></div>
+        <div id="flash"></div>
+        <div id="overlay"></div>
+      </div>
+      <div class="card" id="mineinfo"></div>
+    </section>
+    <section id="tab-furnace" class="tab hidden"></section>
+    <section id="tab-market" class="tab hidden"></section>
+    <section id="tab-shop" class="tab hidden"></section>
+    <section id="tab-prog" class="tab hidden"></section>
+  </main>
+  <nav id="nav"></nav>
+  <div id="toasts"></div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ================= ПИКСЕЛЬ-АРТ (SVG) ================= */
+function grid(fn){const g=[];for(let y=0;y<16;y++){g[y]=[];for(let x=0;x<16;x++)g[y][x]=fn(x,y)||null}return g}
+function uri(g){let o='';for(let y=0;y<16;y++){let x=0;while(x<16){const c=g[y][x];if(!c){x++;continue}let e=x+1;while(e<16&&g[y][e]===c)e++;o+=`<rect x="${x}" y="${y}" width="${e-x}" height="1" fill="${c}"/>`;x=e}}return 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">${o}</svg>`)}
+const gen=fn=>uri(grid(fn));
+const fromMap=(rows,pal)=>uri(grid((x,y)=>{const ch=(rows[y]||'')[x];return ch&&ch!=='.'?pal[ch]:null}));
+
+function texGold(){const r=rng(7),pal=['#f8d73e','#f8d73e','#fbe35a','#f2c92a','#fff08a','#f8d73e','#f2c92a'];
+  return gen((x,y)=>{if(y===0||x===0)return '#fff6a8';if(y===15||x===15)return '#b9810a';if(y===14||x===14)return '#dba016';if(y===1||x===1)return '#fde96a';
+    if((x+y)%7===3&&x>2&&x<13&&y>2&&y<13)return '#fff9c8';return pal[Math.floor(r()*pal.length)]})}
+function texOre(seed,cols){const r=rng(seed),st=['#8b8b8b','#858585','#949494','#7a7a7a','#8b8b8b'];
+  const g=grid((x,y)=>{if(x===0||y===0)return '#a5a5a5';if(x===15||y===15)return '#5e5e5e';return st[Math.floor(r()*st.length)]});
+  const spots=[[3,3],[9,2],[5,8],[11,9],[3,12],[10,12],[7,5]],sh=[[0,0],[1,0],[0,1],[1,1],[-1,0]];
+  spots.forEach(([sx,sy])=>sh.forEach(([dx,dy])=>{if(r()<.85){const X=sx+dx,Y=sy+dy;if(X>0&&X<15&&Y>0&&Y<15)g[Y][X]=cols[Math.floor(r()*cols.length)]}}));return uri(g)}
+function texTNT(){const r=rng(3),T=["XXX",".X.",".X.",".X.",".X."],N=["X.X","XXX","XXX","X.X","X.X"],L=[T,N,T],xs=[2,6,10];
+  const g=grid((x,y)=>{if(x===0||x===15)return '#8c2414';if(y===0)return '#ee5a42';if(y===15)return '#9c2a18';
+    if(y===4||y===10)return '#bdb5a5';if(y>4&&y<10)return '#e8e0d0';return(x===3||x===8||x===12)?'#b52f1c':(r()<.12?'#c9371f':'#d6402b')});
+  L.forEach((gl,i)=>gl.forEach((row,yy)=>[...row].forEach((ch,xx)=>{if(ch==='X')g[5+yy][xs[i]+xx]='#2a2a2a'})));return uri(g)}
+function texGrass(){const r=rng(11);const g=grid(()=>{const v=r();return v<.55?'#5fa83a':v<.75?'#68b542':v<.9?'#559a33':'#4d8f2e'});
+  for(let i=0;i<14;i++){const x=Math.floor(r()*16),y=Math.floor(r()*15);g[y][x]='#3f7a26';g[y+1][x]='#3f7a26'}
+  for(let i=0;i<10;i++){g[Math.floor(r()*16)][Math.floor(r()*16)]='#7bc94f'}return uri(g)}
+function texCrack(n){const r=rng(99),pts=[];
+  for(let b=0;b<5;b++){let px=8,py=8,a=b*1.256+r()*.5;for(let s=0;s<9;s++){a+=(r()-.5)*.9;px+=Math.cos(a)*1.1;py+=Math.sin(a)*1.1;const X=Math.round(px),Y=Math.round(py);if(X<1||X>14||Y<1||Y>14)break;pts.push([X,Y])}}
+  pts.sort((a,b)=>Math.hypot(a[0]-8,a[1]-8)-Math.hypot(b[0]-8,b[1]-8));
+  const g=grid(()=>null);pts.slice(0,Math.ceil(pts.length*n/3)).forEach(([x,y])=>g[y][x]='#000000b3');return uri(g)}
+function texPick(c){return gen((x,y)=>{const r=Math.hypot(x-6,y-9);
+  if(x>=5&&y<=10&&r>=5.5&&r<=7.9)return r>7.1?c[2]:(r<6.3?c[0]:c[1]);
+  if((x+y===15||x+y===14)&&x>=2&&x<=10&&y<=13)return x+y===15?'#a8793c':'#6e4a22';return null})}
+const gemTex=(L,M,D)=>gen((x,y)=>{const dx=Math.abs(x-7.5),dy=Math.abs(y-7.5),s=dx+dy;if(s>7)return null;if(s>6)return D;if(y<5.5&&dx<3)return L;if(s>5)return D;return x<7.5?(y<7.5?L:M):(y<7.5?M:D)});
+function coinTex(){return gen((x,y)=>{const d=Math.hypot(x-7.5,y-7.5);if(d>6.2)return null;if(d>5.2)return '#9a6a05';if(d>4.2)return '#e0a81c';
+  if((x===7||x===8)&&y>=4&&y<=11)return '#b07a0c';if(x+y<11&&d>2)return '#fff27a';return '#f9d03f'})}
+function nuggetTex(){const r=rng(5);return gen((x,y)=>{const d=Math.hypot(x-7.5,y-8.2),n=r()*1.1;if(d>4.6+n*.6)return null;if(d>3.6)return '#9a6a05';return x+y<14?'#fff27a':'#f2c92a'})}
+function lumpTex(){const r=rng(8);return gen((x,y)=>{const d=Math.hypot(x-7.5,y-8),n=r()*1.2;if(d>5.2+n*.5)return null;if(d>4.3)return '#0c0c0c';return(x+y<12&&r()<.5)?'#555':(r()<.2?'#3a3a3a':'#202020')})}
+function ingotTex(){return gen((x,y)=>{
+  if(y>=5&&y<=7){const x0=3+(7-y),x1=11+(7-y);if(x>=x0&&x<=x1)return(y===5||x===x0||x===x1)?'#fff6a8':'#ffe45a'}
+  if(y>=8&&y<=11&&x>=3&&x<=11)return y===11?'#b07a0c':(x===3?'#f2c92a':'#e0a81c');
+  if(y>=6&&y<=10&&x>=12&&x<=13)return(x-12)+(y-6)<=4&&y-6>=x-12?'#b9810a':null;
+  if(y===12&&x>=3&&x<=11)return '#7a5206';return null})}
+function appleTex(){return gen((x,y)=>{const d=Math.hypot(x-7.5,y-9);if(y>=2&&y<=3&&x>=8&&x<=10)return '#3fa535';if(x===7&&y>=3&&y<=4)return '#6e4a22';
+  if(d>5.6)return null;if(d>4.6)return '#b07a0c';if(x>=4&&x<=6&&y>=6&&y<=7)return '#fff8b0';return '#f6c92b'})}
+const MAPS={
+ villager:{rows:["................","....ssssssss....","...ssssssssss...","...BBBBBBBBBB...","...ssGssssGss...","...ssssnnssss...","...ssssnnssss...","...ssssnnssss...","....ssssssss....","...rrrrrrrrrr...","..rrrrrrrrrrrr..","..raaaaaaaaaar..","..raaaaaaaaaar..","..rrrrrrrrrrrr..","..rrrrrrrrrrrr..","...rrrrrrrrrr..."],pal:{s:'#c58f6a',B:'#5a3a22',G:'#2f8f3f',n:'#a8714e',r:'#7a5230',a:'#5e3d20'}},
+ torch:{rows:["................",".......yy.......","......oyyo......","......oyyo......",".......oo.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......",".......BD.......","................"],pal:{y:'#fff3a0',o:'#ff9a1f',B:'#a8793c',D:'#6e4a22'}},
+ cart:{rows:["................","................","....yyyYyyy.....","...yYyyyyYyy....","..GGGGGGGGGGGG..","..GgggggggggGG..","..GgggggggggGG..","..GGGGGGGGGGGG..","...GGGGGGGGGG...","....kk....kk....","...kkkk..kkkk...","....kk....kk...."],pal:{y:'#f9d03f',Y:'#fff27a',G:'#9a9a9a',g:'#6e6e6e',k:'#222'}},
+ fire:{rows:["................",".......r........","......rro.......","......rroo......",".....rrooo.r....",".....rroyoor....","....rrooyyoor...","....rooyyyyor...","....rooyyyyoor..","....rooyyyyor...",".....roooyoor...",".....rrooooor...","......rrrrrr...."],pal:{r:'#d9381e',o:'#ff9a1f',y:'#fff3a0'}},
+ furnace:{rows:["GGGGGGGGGGGGGGGG","GgGGgGGGGgGGGgGG","GGGgGGGgGGGGgGGG","GGGGGGGGGGGGGGGG","GGhhhhhhhhhhhhGG","GGhkkkkkkkkkkhGG","GGhkkkkkkkkkkhGG","GGhkkkkkkkkkkhGG","GGhkkkkkkkkkkhGG","GGhkkkkkkkkkkhGG","GGhhhhhhhhhhhhGG","GGGGGGGGGGGGGGGG","GgGGGGgGGGGgGGGG","GGGGgGGGGGGGgGGG","GGGGGGGGGGGGGGGG","gggggggggggggggg"],pal:{G:'#8f8f8f',g:'#6c6c6c',h:'#5a5a5a',k:'#1a1a1a'}},
+ star:{rows:["................","................",".......yy.......",".......yy.......","......yyyy......","..yyyyyyyyyyyy..","...yyyyyyyyyy...","....yyyyyyyy....",".....yyyyyy.....","....yyyyyyyy....","....yyy..yyy....","...yyy....yyy..."],pal:{y:'#ffd93b'}},
+ flower:{rows:["................","................","................","................",".......pp.......","......pppp......",".....ppyypp.....","......pppp......",".......pp.......",".......gg.......","......ggg.......",".......gg.......",".....g.gg.g.....","......gggg......",".......gg......."],pal:null}
+};
+const ICON={};
+const PICKS=[
+{n:'Деревянная кирка',d:1,c:0,dia:0,col:['#c49a5a','#a47a3f','#7a5a2b']},
+{n:'Каменная кирка',d:2,c:150,dia:0,col:['#b8b8b8','#8d8d8d','#666666']},
+{n:'Железная кирка',d:3,c:1200,dia:0,col:['#fafafa','#d4d4d4','#9a9a9a']},
+{n:'Золотая кирка',d:4,c:6500,dia:0,col:['#fff27a','#fcdb4a','#c4890a']},
+{n:'Алмазная кирка',d:6,c:32000,dia:3,col:['#b8fffb','#4fe3d9','#1fa9a2']},
+{n:'Незеритовая кирка',d:9,c:180000,dia:10,col:['#8a7a84','#4a3f45','#2a2226']}];
+function buildIcons(){
+  ICON.b_gold=texGold();ICON.b_coal=texOre(21,['#161616','#262626','#0e0e0e','#363636']);ICON.b_diamond=texOre(33,['#4ee6e0','#2bb8b3','#bffffb','#3ad8d0']);ICON.b_tnt=texTNT();
+  ICON.gblock=ICON.b_gold;ICON.grass=texGrass();ICON.crack1=texCrack(1);ICON.crack2=texCrack(2);ICON.crack3=texCrack(3);
+  ICON.coin=coinTex();ICON.ore=nuggetTex();ICON.coal=lumpTex();ICON.ingot=ingotTex();ICON.apple=appleTex();
+  ICON.diamond=gemTex('#bffffb','#4fe3d9','#1fa9a2');ICON.emerald=gemTex('#b8ffc8','#3fd36a','#1c8f40');
+  PICKS.forEach((p,i)=>ICON['pick'+i]=texPick(p.col));
+  Object.keys(MAPS).forEach(k=>{if(MAPS[k].pal)ICON[k]=fromMap(MAPS[k].rows,MAPS[k].pal)});
+  ['#e5533d','#f4f4f4','#5aa0ff','#ffb13b'].forEach((c,i)=>ICON['fl'+i]=fromMap(MAPS.flower.rows,{p:c,y:'#ffe94a',g:'#3d7a22'}));
+}
+buildIcons();
+const img=(k,c='')=>`<img class="${c}" src="${ICON[k]}" alt="">`;
+
+/* ================= ДАННЫЕ ================= */
+const GOODS=[{id:'ore',n:'Золотая руда',base:5},{id:'coal',n:'Уголь',base:3},{id:'ingot',n:'Золотой слиток',base:20},{id:'gblock',n:'Золотой блок',base:215},{id:'diamond',n:'Алмаз',base:150}];
+const GM={};GOODS.forEach(g=>GM[g.id]=g);
+const BT={gold:{hp:4,life:3.2,xp:3,col:['#f9d03f','#fff27a','#c4890a']},coal:{hp:3,life:3,xp:2,col:['#222','#444','#777']},diamond:{hp:7,life:2.4,xp:25,col:['#4ee6e0','#bffffb','#2bb8b3']},tnt:{hp:1,life:3,xp:0,col:['#d6402b','#ff9a1f','#333']}};
+const pw=(b,e,l)=>Math.round(b*Math.pow(e,l));
+const UPG=[
+{id:'sharp',n:'Заточка',ic:'pick3',max:6,ds:l=>`Урон кирки +1 за уровень (сейчас +${l})`,cost:l=>({c:pw(250,1.9,l),d:0})},
+{id:'time',n:'Шахтёрские фонари',ic:'torch',max:10,ds:l=>`Раунд длится ${30+5*l} с (+5 с за уровень)`,cost:l=>({c:pw(120,1.55,l),d:0})},
+{id:'spawn',n:'Богатая жила',ic:'b_gold',max:10,ds:l=>`Блоки появляются чаще, до ${Math.min(12,4+l)} на поле`,cost:l=>({c:pw(200,1.7,l),d:0})},
+{id:'luck',n:'Удача',ic:'diamond',max:8,ds:l=>`Больше руды и угля, чаще алмазы (ур. ${l})`,cost:l=>({c:pw(500,2,l),d:l>=2?l-1:0})},
+{id:'helpers',n:'Жители-помощники',ic:'villager',max:8,ds:l=>`Сами бьют блоки в раунде (${l} шт.)`,cost:l=>({c:pw(400,1.65,l),d:0})},
+{id:'cart',n:'Вагонетка',ic:'cart',max:10,ds:l=>`Копает руду без раундов: ${(l*.3).toFixed(1)}/с`,cost:l=>({c:pw(600,1.7,l),d:0})},
+{id:'slots',n:'Больше печей',ic:'furnace',max:8,ds:l=>`Плавят одновременно: ${1+l}`,cost:l=>({c:pw(300,1.8,l),d:0})},
+{id:'smeltSpd',n:'Меха',ic:'fire',max:6,ds:l=>`Плавка: ${(6*Math.pow(.88,l)).toFixed(1)} с на слиток`,cost:l=>({c:pw(400,1.75,l),d:0})},
+{id:'trade',n:'Репутация торговца',ic:'emerald',max:10,ds:l=>`Цены продажи на рынке +${l*5}%`,cost:l=>({c:pw(800,1.9,l),d:0})},
+{id:'tntShield',n:'Сапёрные очки',ic:'b_tnt',max:3,ds:l=>`TNT отнимает ${Math.max(1,4-l)} с вместо 4`,cost:l=>({c:pw(700,2.2,l),d:0})}];
+const EVENTS=[
+{t:'Караван скупает золото! Руда, слитки и блоки дороже',mult:{ore:1.4,ingot:1.4,gblock:1.4}},
+{t:'Обвал рынка: золото дешевеет',mult:{ore:.7,ingot:.7,gblock:.7}},
+{t:'Нехватка угля: уголь дорожает',mult:{coal:1.9}},
+{t:'Алмазная лихорадка: алмазы в цене',mult:{diamond:1.5}},
+{t:'Налог на кузнецов: слитки дешевле',mult:{ingot:.8,gblock:.85}},
+{t:'Строительный бум: золотые блоки нарасхват',mult:{gblock:1.5}}];
+const ACH=[
+{id:'first',n:'Первая добыча',d:'Сломай 1 блок',r:10,ok:()=>S.stats.blocks>=1},
+{id:'b100',n:'Шахтёр',d:'Сломай 100 блоков',r:50,ok:()=>S.stats.blocks>=100},
+{id:'b1000',n:'Забойщик',d:'Сломай 1 000 блоков',r:500,ok:()=>S.stats.blocks>=1000},
+{id:'b10000',n:'Король шахты',d:'Сломай 10 000 блоков',r:5000,ok:()=>S.stats.blocks>=10000},
+{id:'r10',n:'Рабочая смена',d:'Сыграй 10 раундов',r:100,ok:()=>S.stats.rounds>=10},
+{id:'r50',n:'Ветеран',d:'Сыграй 50 раундов',r:1000,ok:()=>S.stats.rounds>=50},
+{id:'ing1',n:'Плавильщик',d:'Выплави 1 слиток',r:30,ok:()=>S.stats.ingots>=1},
+{id:'ing100',n:'Кузнец',d:'Выплави 100 слитков',r:300,ok:()=>S.stats.ingots>=100},
+{id:'dia',n:'Алмазы!',d:'Добудь алмаз',r:100,ok:()=>S.stats.diaGot>=1},
+{id:'tnt1',n:'Бабах',d:'Взорви TNT',r:20,ok:()=>S.stats.tnt>=1},
+{id:'tnt10',n:'Подрывник',d:'Взорви 10 TNT',r:100,ok:()=>S.stats.tnt>=10},
+{id:'c20',n:'Разгон',d:'Комбо 20',r:100,ok:()=>S.stats.maxCombo>=20},
+{id:'c50',n:'Неудержимый',d:'Комбо 50',r:400,ok:()=>S.stats.maxCombo>=50},
+{id:'rich1',n:'Зажиточный',d:'Заработай 10 000 монет',r:500,ok:()=>S.stats.coinsEarned>=10000},
+{id:'rich2',n:'Миллионер',d:'Заработай 1 000 000 монет',r:50000,ok:()=>S.stats.coinsEarned>=1000000},
+{id:'dpick',n:'Алмазная мечта',d:'Купи алмазную кирку',r:1000,ok:()=>S.pick>=4},
+{id:'apple',n:'Золотой гурман',d:'Скрафти золотое яблоко',r:100,ok:()=>S.stats.apples>=1},
+{id:'trader',n:'Торговец',d:'Продай 100 товаров',r:200,ok:()=>S.stats.sold>=100}];
+
+/* ================= СОСТОЯНИЕ ================= */
+const KEY='gold_rush_mc_v1';
+const defaults=()=>({coins:0,ore:0,coal:0,ingot:0,diamond:0,gblock:0,apple:0,xp:0,level:1,pick:0,sharp:0,time:0,spawn:0,luck:0,helpers:0,cart:0,slots:0,smeltSpd:0,trade:0,tntShield:0,queue:0,prog:0,cartAcc:0,sound:true,
+  stats:{blocks:0,rounds:0,tnt:0,coinsEarned:0,best:0,maxCombo:0,ingots:0,sold:0,diaGot:0,apples:0},ach:{},mk:null,last:Date.now()});
+function load(){const d=defaults();try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);Object.assign(d,o);d.stats=Object.assign(defaults().stats,o.stats||{});d.ach=o.ach||{}}}catch(e){}return d}
+let S=load();
+function save(){S.last=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+if(!S.mk||!S.mk.m||!S.mk.h)S.mk={m:{},h:{}};
+GOODS.forEach(g=>{if(typeof S.mk.m[g.id]!=='number')S.mk.m[g.id]=1;if(!Array.isArray(S.mk.h[g.id])||!S.mk.h[g.id].length)S.mk.h[g.id]=Array(18).fill(g.base)});
+let R=null,EV=null,tab='mine';
+
+const fmt=n=>{n=Math.floor(n);if(n<1000)return String(n);const u=['K','M','B','T'];let i=-1,v=n;while(v>=1000&&i<u.length-1){v/=1000;i++}return(v<10?v.toFixed(2):v<100?v.toFixed(1):String(Math.floor(v)))+u[i]};
+const dmg=()=>PICKS[S.pick].d+S.sharp;
+const roundTime=()=>30+5*S.time;
+const tntPen=()=>Math.max(1,4-S.tntShield);
+const need=l=>Math.round(60*Math.pow(l,1.45));
+const smeltTime=()=>6*Math.pow(.88,S.smeltSpd);
+function addCoins(n){S.coins+=n;S.stats.coinsEarned+=n}
+
+/* ================= ЗВУК ================= */
+let AC=null;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,d,type='square',v=.05,slide=0,delay=0){if(!S.sound)return;const a=ac();if(!a)return;const t=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02)}
+function noise(d,v,fc){if(!S.sound)return;const a=ac();if(!a)return;const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.value=fc;const g=a.createGain();g.gain.value=v;s.connect(f);f.connect(g);g.connect(a.destination);s.start()}
+const sfx={
+ hit:()=>{tone(170+Math.random()*60,.06,'square',.045,-60)},
+ brk:()=>{tone(520,.07,'square',.05);tone(780,.1,'square',.045,0,.06)},
+ coin:()=>{tone(988,.07,'square',.04);tone(1319,.12,'square',.04,0,.07)},
+ buy:()=>{tone(660,.06,'square',.04);tone(880,.09,'square',.04,0,.06)},
+ err:()=>{tone(120,.15,'sawtooth',.05)},
+ boom:()=>{noise(.5,.35,500);tone(90,.35,'sawtooth',.07,-50)},
+ level:()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.12,'square',.045,0,i*.08))},
+ start:()=>{[392,523,659].forEach((f,i)=>tone(f,.1,'square',.04,0,i*.07))},
+ end:()=>{[659,523,392].forEach((f,i)=>tone(f,.14,'square',.04,0,i*.1))}};
+
+/* ================= ВЕРХНЯЯ ПАНЕЛЬ ================= */
+const RES=[['coins','coin'],['ore','ore'],['coal','coal'],['ingot','ingot'],['diamond','diamond']];
+$('res').innerHTML=RES.map(([k,i])=>`<div class="chip" id="chip-${k}">${img(i)}<b id="v-${k}">0</b></div>`).join('');
+$('logoimg').src=ICON.b_gold;
+let hkey='';
+function updateHeader(){const key=`${S.coins}|${S.ore}|${S.coal}|${S.ingot}|${S.diamond}|${S.xp}|${S.level}`;if(key===hkey)return;hkey=key;
+  RES.forEach(([k])=>{$('v-'+k).textContent=fmt(S[k])});const nd=need(S.level);$('lvTxt').textContent='Ур. '+S.level;$('xpFill').style.width=clamp(S.xp/nd*100,0,100)+'%';$('xpTxt').textContent=`+${(S.level-1)*2}% добычи`}
+function bump(k){const c=$('chip-'+k);if(!c)return;c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump')}
+function toast(msg,icon){const d=document.createElement('div');d.className='toast';d.innerHTML=(icon&&ICON[icon]?img(icon):'')+`<span>${msg}</span>`;const t=$('toasts');t.appendChild(d);while(t.children.length>4)t.removeChild(t.firstChild);setTimeout(()=>{d.style.transition='opacity .4s';d.style.opacity='0';setTimeout(()=>d.remove(),400)},2600)}
+function addXP(n){S.xp+=n;let up=false;while(S.xp>=need(S.level)){S.xp-=need(S.level);S.level++;up=true;addCoins(50*S.level);toast(`Уровень ${S.level}! Бонус +${50*S.level} монет`,'star')}if(up)sfx.level()}
+function checkAch(){ACH.forEach(a=>{if(!S.ach[a.id]&&a.ok()){S.ach[a.id]=1;addCoins(a.r);toast(`Достижение: ${a.n} (+${fmt(a.r)})`,'star');sfx.level()}})}
+
+/* ================= ЭФФЕКТЫ ================= */
+function particles(x,y,type,n,s=1){const fx=$('fx');if(fx.childElementCount>140)return;const cols=BT[type].col;
+  for(let i=0;i<n;i++){const p=document.createElement('i');p.className='pt';const sz=ri(3,6)*(n>8?1.2:1);p.style.cssText=`left:${x}px;top:${y}px;width:${sz}px;height:${sz}px;background:${cols[ri(0,cols.length-1)]}`;fx.appendChild(p);
+    const a=rnd(0,6.283),dist=rnd(14,50)*s*(n>8?1.3:1);const an=p.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(a)*dist}px,${Math.sin(a)*dist+22}px) rotate(${rnd(-200,200)}deg)`,opacity:0}],{duration:rnd(350,650),easing:'cubic-bezier(.15,.7,.3,1)'});an.onfinish=()=>p.remove()}}
+function floatText(x,y,parts,cls=''){const fx=$('fx');const d=document.createElement('div');d.className='ft '+cls;d.innerHTML=parts.map(p=>`<span style="${p.c?'color:'+p.c:''}">${p.i?img(p.i):''}${p.t}</span>`).join('');d.style.left=clamp(x-28,6,Math.max(6,fx.clientWidth-96))+'px';d.style.top=clamp(y-10,6,Math.max(6,fx.clientHeight-50))+'px';fx.appendChild(d);d.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-46px)',opacity:0}],{duration:900,easing:'ease-out'}).onfinish=()=>d.remove()}
+function shake(){$('field').animate([{transform:'translate(0,0)'},{transform:'translate(-6px,3px)'},{transform:'translate(5px,-4px)'},{transform:'translate(-3px,2px)'},{transform:'translate(0,0)'}],{duration:300});$('flash').animate([{opacity:.55},{opacity:0}],{duration:350})}
+
+/* ================= РАУНД ================= */
+function pickType(){const r=Math.random(),dia=.025+.004*S.luck,tnt=.11,coal=.2;if(r<dia)return 'diamond';if(r<dia+tnt)return 'tnt';if(r<dia+tnt+coal)return 'coal';return 'gold'}
+function spawnBlock(){if(!R)return;const F=$('blocks'),W=F.clientWidth,H=F.clientHeight;if(W<80)return;const size=W<420?58:70;let x,y,ok=false;
+  for(let i=0;i<14&&!ok;i++){x=rnd(6,W-size-6);y=rnd(6,H-size-14);ok=R.blocks.every(b=>Math.hypot(b.x-x,b.y-y)>size*.95)}if(!ok)return;
+  const type=pickType(),d=BT[type],el=document.createElement('div');el.className='blk '+type;el.style.cssText=`left:${x}px;top:${y}px;width:${size}px;height:${size}px`;
+  el.innerHTML=`<img class="bimg" src="${ICON['b_'+type]}" draggable="false" alt=""><img class="crack" draggable="false" alt=""><div class="lt"><i></i></div>`;F.appendChild(el);
+  const b={type,hp:d.hp,max:d.hp,el,crack:el.querySelector('.crack'),bar:el.querySelector('.lt i'),life:d.life*rnd(.9,1.1),x,y,size,dead:false};b.lifeMax=b.life;el._b=b;R.blocks.push(b)}
+function removeBlock(b,anim){b.dead=true;const i=R.blocks.indexOf(b);if(i>=0)R.blocks.splice(i,1);if(anim){b.el.classList.add('breaking');setTimeout(()=>b.el.remove(),200)}else b.el.remove()}
+function hitBlock(b,d,o){o=o||{};if(!R||b.dead)return;if(b.type==='tnt'){explode(b);return}
+  const cx=o.px!=null?o.px:b.x+b.size/2,cy=o.py!=null?o.py:b.y+b.size/2;b.hp-=d;particles(cx,cy,b.type,4,1);
+  if(b.hp<=0){breakBlock(b,o);return}
+  sfx.hit();const st=clamp(Math.ceil((1-b.hp/b.max)*3),1,3);b.crack.src=ICON['crack'+st];b.crack.style.display='block';
+  b.el.classList.remove('hit');void b.el.offsetWidth;b.el.classList.add('hit')}
+function breakBlock(b,o){removeBlock(b,true);const player=!!o.player;
+  if(player){R.combo++;R.comboT=1.6;R.maxCombo=Math.max(R.maxCombo,R.combo);S.stats.maxCombo=Math.max(S.stats.maxCombo,R.combo)}
+  const cm=1+Math.min(R.combo,60)*.02,fv=R.fever?2:1,lv=1+(S.level-1)*.02;let ore=0,coal=0,coins=0,dia=0;const xp=BT[b.type].xp;
+  if(b.type==='gold'){ore=Math.max(1,Math.round((1+Math.random()*(1+S.luck*.6))*lv*fv*cm));coins=Math.max(1,Math.round(rnd(2,5)*lv*fv*cm))}
+  else if(b.type==='coal'){coal=Math.max(1,Math.round((1+Math.random()*(1.5+S.luck*.4))*fv));coins=1}
+  else{dia=1+(Math.random()<.1*S.luck?1:0);coins=Math.round(10*fv*cm);S.stats.diaGot+=dia}
+  S.ore+=ore;S.coal+=coal;S.diamond+=dia;addCoins(coins);S.stats.blocks++;
+  const g=R.got;g.ore+=ore;g.coal+=coal;g.coins+=coins;g.diamond+=dia;g.blocks++;g.xp+=xp;
+  const cx=b.x+b.size/2,cy=b.y+b.size/2,parts=[];if(ore)parts.push({i:'ore',t:'+'+ore,c:'#ffe45a'});if(coal)parts.push({i:'coal',t:'+'+coal,c:'#ddd'});if(dia)parts.push({i:'diamond',t:'+'+dia,c:'#7ff'});if(coins)parts.push({i:'coin',t:'+'+coins,c:'#ffd93b'});
+  floatText(cx,cy,parts);particles(cx,cy,b.type,14,1);b.type==='diamond'?(sfx.coin(),sfx.level()):sfx.brk();if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}
+  addXP(xp);if(player&&R.combo>0&&R.combo%10===0)floatText(cx,cy-24,[{t:'КОМБО '+R.combo+'!',c:'#8fe35a'}])}
+function explode(b){removeBlock(b,true);const cx=b.x+b.size/2,cy=b.y+b.size/2,pen=tntPen();R.t-=pen;R.combo=0;R.comboT=0;S.stats.tnt++;
+  sfx.boom();particles(cx,cy,'tnt',26,1.6);floatText(cx,cy,[{t:'−'+pen+' с'}],'bad');shake();
+  R.blocks.slice().forEach(n=>{if(!n.dead&&Math.hypot(n.x-b.x,n.y-b.y)<b.size*2.2)hitBlock(n,dmg()*2,{})})}
+function helperHit(){const c=R.blocks.filter(b=>!b.dead&&b.type!=='tnt');if(!c.length)return;const b=c[Math.floor(Math.random()*c.length)];hitBlock(b,Math.max(1,Math.floor(dmg()*.5)),{})}
+function roundTick(dt){if(!R)return;R.t-=dt;if(R.t<=0){endRound();return}
+  R.comboT-=dt;if(R.comboT<=0)R.combo=0;
+  R.spawnT-=dt;if(R.spawnT<=0){if(R.blocks.length<Math.min(12,4+S.spawn))spawnBlock();R.spawnT=Math.max(.25,.85-.06*S.spawn)*rnd(.7,1.3)}
+  R.blocks.slice().forEach(b=>{if(b.dead)return;b.life-=dt;b.bar.style.width=clamp(b.life/b.lifeMax*100,0,100)+'%';if(b.life<=0)removeBlock(b,true)});
+  if(S.helpers>0&&R){R.hAcc+=dt*S.helpers*.9;while(R.hAcc>=1&&R){R.hAcc-=1;helperHit()}}}
+function startRound(){ac();const ua=$('useApple');let fever=false;if(ua&&ua.checked&&S.apple>0){S.apple--;fever=true}
+  R={total:roundTime(),t:roundTime(),blocks:[],spawnT:.05,combo:0,comboT:0,maxCombo:0,hAcc:0,fever,got:{ore:0,coal:0,coins:0,diamond:0,blocks:0,xp:0}};
+  $('blocks').innerHTML='';$('fx').innerHTML='';$('overlay').classList.add('hidden');sfx.start();gkey=''}
+function endRound(){const g=R.got,mc=R.maxCombo,fv=R.fever;R=null;$('blocks').innerHTML='';S.stats.rounds++;S.stats.best=Math.max(S.stats.best,g.blocks);sfx.end();checkAch();save();showResult(g,mc,fv);buildMineInfo()}
+function showStart(){const ov=$('overlay');ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="ovp"><h2>Золотая лихорадка</h2><p>Раунд ${roundTime()} с. Бей золотые блоки, пока они не исчезли. Чем быстрее — тем больше комбо и награда!</p><p>Уголь нужен для печи, алмазы редки. <b style="color:#ff8a75">TNT не трогай:</b> минус ${tntPen()} с.</p>${S.apple>0?`<label class="chk"><input type="checkbox" id="useApple" checked> Съесть золотое яблоко: ×2 добыча (${S.apple} шт.)</label>`:''}<button class="btn gold big-btn" id="goBtn">НАЧАТЬ РАУНД</button></div>`;$('goBtn').onclick=startRound}
+function showResult(g,mc,fv){const ov=$('overlay');ov.classList.remove('hidden');
+  ov.innerHTML=`<div class="ovp"><h2>Раунд окончен!</h2>${fv?'<p style="color:#ffd93b;font-weight:800">Золотая лихорадка ×2</p>':''}<div class="got"><div>${img('b_gold')}${g.blocks} блоков</div><div>${img('coin')}+${fmt(g.coins)}</div><div>${img('ore')}+${fmt(g.ore)}</div><div>${img('coal')}+${fmt(g.coal)}</div><div>${img('diamond')}+${g.diamond}</div><div>${img('star')}комбо ${mc}</div></div><p>Руду и уголь неси в печь, слитки продавай на рынке.</p>${S.apple>0?`<label class="chk"><input type="checkbox" id="useApple"> Съесть золотое яблоко (${S.apple} шт.)</label>`:''}<button class="btn gold big-btn" id="goBtn">ЕЩЁ РАУНД</button><div class="mt"><button class="btn blue" id="toFurn">В печь</button></div></div>`;
+  $('goBtn').onclick=startRound;$('toFurn').onclick=()=>setTab('furnace')}
+$('blocks').addEventListener('pointerdown',e=>{const el=e.target.closest('.blk');if(!el||!R||tab!=='mine')return;e.preventDefault();ac();const b=el._b;if(!b||b.dead)return;const rc=$('blocks').getBoundingClientRect();hitBlock(b,dmg(),{px:e.clientX-rc.left,py:e.clientY-rc.top,player:true})});
+
+let gkey='';
+function updateHUD(){if(tab!=='mine')return;
+  if(R){$('tm').textContent=Math.max(0,R.t).toFixed(1);$('tbar').style.width=clamp(R.t/R.total*100,0,100)+'%';const cm=1+Math.min(R.combo,60)*.02;
+    $('cmb').textContent=(R.fever?'ЛИХОРАДКА ×2   ':'')+(R.combo>1?`КОМБО ${R.combo} ×${cm.toFixed(2)}`:'');
+    const g=R.got,k=`${g.ore}|${g.coal}|${g.coins}|${g.diamond}`;if(k!==gkey){gkey=k;$('gotrow').innerHTML=`<span>${img('ore')}${g.ore}</span><span>${img('coal')}${g.coal}</span><span>${img('coin')}${g.coins}</span><span>${img('diamond')}${g.diamond}</span>`}}
+  else{$('tm').textContent=roundTime().toFixed(1);$('tbar').style.width='100%';$('cmb').textContent='';if(gkey!=='idle'){gkey='idle';$('gotrow').innerHTML='<span class="dim">Награда за раунд появится здесь</span>'}}}
+function buildMineInfo(){const p=PICKS[S.pick];
+  $('mineinfo').innerHTML=`<div class="row" style="padding-top:0">${img('pick'+S.pick,'ic')}<div class="tx"><b>${p.n}</b><small>Урон ${dmg()} • помощников: ${S.helpers} • вагонетка: +${(S.cart*.3).toFixed(1)} руды/с</small></div></div>
+  <div class="lgrid"><div class="lg">${img('b_gold')}<span><b>Золото</b><small>руда и монеты</small></span></div><div class="lg">${img('b_coal')}<span><b>Уголь</b><small>топливо для печи</small></span></div><div class="lg">${img('b_diamond')}<span><b>Алмаз</b><small>редкий, дорогой</small></span></div><div class="lg">${img('b_tnt')}<span><b>TNT</b><small>−${tntPen()} с, лучше не бить</small></span></div></div>`}
+
+/* ================= ПАССИВ: печь и вагонетка ================= */
+function passive(dt){
+  if(S.cart>0){S.cartAcc+=S.cart*.3*dt;const n=Math.floor(S.cartAcc);if(n>0){S.cartAcc-=n;S.ore+=n}}
+  if(S.queue>0){S.prog+=dt*(1+S.slots)/smeltTime();while(S.prog>=1&&S.queue>0){S.prog-=1;S.queue--;S.ingot++;S.stats.ingots++}if(S.queue<=0){S.queue=0;S.prog=0}}else S.prog=0}
+let lastWall=Date.now();
+function wallTick(){const n=Date.now();const dt=Math.min((n-lastWall)/1000,8*3600);lastWall=n;if(dt>0)passive(dt);if(tab==='furnace')updateFurnace();if(tab==='shop')refreshAfford()}
+
+/* ================= ПЕЧЬ ================= */
+function buildFurnace(){
+  $('tab-furnace').innerHTML=`<div class="card"><h3>Печь</h3><div class="furn" id="furn"><img class="base" src="${ICON.furnace}" alt=""><img class="flame" src="${ICON.fire}" alt=""></div>
+  <div class="center small" id="f-info"></div><div class="bar big mt"><i id="f-bar"></i></div><div class="small dim center mt">1 золотая руда + 1 уголь = 1 слиток</div>
+  <div class="btnrow mt"><button class="btn" data-a="load" data-n="1">В печь ×1</button><button class="btn" data-a="load" data-n="10">×10</button><button class="btn gold" data-a="load" data-n="max">Макс</button></div></div>
+  <div class="card"><h3>Верстак</h3>
+  <div class="row">${img('gblock','ic')}<div class="tx"><b>Золотой блок</b><small>9 слитков. Продаётся дороже, чем 9 слитков по отдельности. В наличии: <span id="c-gblock">0</span></small></div><div style="display:flex;flex-direction:column;gap:4px"><button class="btn" data-a="craft" data-id="gblock" data-all="0">×1</button><button class="btn gold" data-a="craft" data-id="gblock" data-all="1">Макс</button></div></div>
+  <div class="row">${img('apple','ic')}<div class="tx"><b>Золотое яблоко</b><small>8 слитков. Съешь перед раундом: ×2 к добыче. В наличии: <span id="c-apple">0</span></small></div><button class="btn" data-a="craft" data-id="apple" data-all="0">Создать</button></div></div>`;
+  updateFurnace()}
+function updateFurnace(){const f=$('f-info');if(!f)return;const mx=Math.min(S.ore,S.coal),slots=1+S.slots;
+  f.innerHTML=`В очереди: <b style="color:#ffd93b">${S.queue}</b> • печей: ${slots} • ${smeltTime().toFixed(1)} с на слиток<br>Руда: ${fmt(S.ore)} • Уголь: ${fmt(S.coal)} • Слитки: ${fmt(S.ingot)}`;
+  $('f-bar').style.width=(S.queue>0?clamp(S.prog,0,1)*100:0)+'%';$('furn').classList.toggle('on',S.queue>0);
+  document.querySelectorAll('#tab-furnace [data-a="load"]').forEach(b=>{b.disabled=mx<1});
+  const cb=document.querySelector('#tab-furnace [data-a="craft"][data-id="gblock"][data-all="0"]'),ca=document.querySelector('#tab-furnace [data-a="craft"][data-id="gblock"][data-all="1"]'),cp=document.querySelector('#tab-furnace [data-a="craft"][data-id="apple"]');
+  if(cb)cb.disabled=S.ingot<9;if(ca){ca.disabled=S.ingot<9;ca.textContent=S.ingot>=9?'Макс ('+Math.floor(S.ingot/9)+')':'Макс'}if(cp)cp.disabled=S.ingot<8;
+  $('c-gblock').textContent=S.gblock;$('c-apple').textContent=S.apple}
+$('tab-furnace').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;ac();const a=b.dataset.a;
+  if(a==='load'){const mx=Math.min(S.ore,S.coal),k=b.dataset.n==='max'?mx:Math.min(+b.dataset.n,mx);if(k<=0){sfx.err();return}S.ore-=k;S.coal-=k;S.queue+=k;sfx.buy()}
+  else if(a==='craft'){if(b.dataset.id==='gblock'){const n=b.dataset.all==='1'?Math.floor(S.ingot/9):(S.ingot>=9?1:0);if(n<=0)return;S.ingot-=9*n;S.gblock+=n}else{if(S.ingot<8)return;S.ingot-=8;S.apple++;S.stats.apples++}sfx.buy();checkAch()}
+  updateFurnace()});
+
+/* ================= РЫНОК ================= */
+const evMult=id=>EV&&EV.mult[id]?EV.mult[id]:1;
+const price=id=>Math.max(1,Math.round(GM[id].base*S.mk.m[id]*evMult(id)));
+const sellP=id=>Math.max(1,Math.floor(price(id)*(1+.05*S.trade)));
+const buyP=id=>Math.ceil(price(id)*1.25);
+function priceTick(){GOODS.forEach(g=>{let m=S.mk.m[g.id];m+=(1-m)*.1+(Math.random()+Math.random()-1)*.14;S.mk.m[g.id]=clamp(m,.55,1.7)});
+  if(EV&&Date.now()>EV.until)EV=null;else if(!EV&&Math.random()<.09){const e=EVENTS[ri(0,EVENTS.length-1)];EV={t:e.t,mult:e.mult,until:Date.now()+rnd(45000,70000)};toast(e.t,'coin')}
+  GOODS.forEach(g=>{const h=S.mk.h[g.id];h.push(price(g.id));if(h.length>24)h.shift()});if(tab==='market')updateMarket()}
+function buildMarket(){
+  let h='<div id="evbanner" class="banner hidden"></div>';
+  GOODS.forEach(g=>{h+=`<div class="card"><div class="mtop">${img(g.id,'ic')}<div class="mname"><b>${g.n}</b><small>В наличии: <span id="own-${g.id}">0</span></small></div><svg class="spark" id="sp-${g.id}" viewBox="0 0 78 30" preserveAspectRatio="none"></svg><div class="mprice"><b id="pr-${g.id}">0</b><small id="dl-${g.id}"></small></div></div>
+  <div class="mbtns"><button class="btn" data-a="buy" data-id="${g.id}" data-n="1">Купить ×1<small id="bp1-${g.id}"></small></button><button class="btn" data-a="buy" data-id="${g.id}" data-n="10">Купить ×10<small id="bp10-${g.id}"></small></button><button class="btn gold" data-a="sell" data-id="${g.id}" data-all="0">Продать ×1<small id="sp1-${g.id}"></small></button><button class="btn gold" data-a="sell" data-id="${g.id}" data-all="1">Продать всё<small id="spa-${g.id}"></small></button></div></div>`});
+  $('tab-market').innerHTML=h;updateMarket()}
+function updateMarket(){const eb=$('evbanner');if(!eb)return;if(EV){eb.classList.remove('hidden');eb.textContent='Событие: '+EV.t}else eb.classList.add('hidden');
+  GOODS.forEach(g=>{const id=g.id,p=price(id),s=sellP(id),b=buyP(id),own=S[id],dl=Math.round((p/g.base-1)*100),hist=S.mk.h[id];
+    $('own-'+id).textContent=fmt(own);$('pr-'+id).textContent=s;const d=$('dl-'+id);d.textContent=(dl>=0?'+':'')+dl+'%';d.className=dl>=0?'up':'dn';
+    $('bp1-'+id).textContent='за '+fmt(b);$('bp10-'+id).textContent='за '+fmt(b*10);$('sp1-'+id).textContent='+'+fmt(s);$('spa-'+id).textContent='+'+fmt(s*own);
+    const mn=Math.min(...hist),mx=Math.max(...hist),rg=Math.max(1,mx-mn);const pts=hist.map((v,i)=>`${(i/(hist.length-1)*76+1).toFixed(1)},${(27-(v-mn)/rg*24).toFixed(1)}`).join(' ');
+    $('sp-'+id).innerHTML=`<polyline points="${pts}" fill="none" stroke="${dl>=0?'#7fe05a':'#ff7d6a'}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+    document.querySelector(`[data-a="buy"][data-id="${id}"][data-n="1"]`).disabled=S.coins<b;document.querySelector(`[data-a="buy"][data-id="${id}"][data-n="10"]`).disabled=S.coins<b*10;
+    document.querySelector(`[data-a="sell"][data-id="${id}"][data-all="0"]`).disabled=own<1;document.querySelector(`[data-a="sell"][data-id="${id}"][data-all="1"]`).disabled=own<1})}
+$('tab-market').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;ac();const id=b.dataset.id;
+  if(b.dataset.a==='buy'){const n=+b.dataset.n,cost=n*buyP(id);if(S.coins<cost){sfx.err();return}S.coins-=cost;S[id]+=n;sfx.buy();bump(id==='gblock'?'coins':id)}
+  else{const own=S[id],n=b.dataset.all==='1'?own:Math.min(1,own);if(n<=0)return;const gain=n*sellP(id);S[id]-=n;addCoins(gain);S.stats.sold+=n;sfx.coin();bump('coins');toast('Продано: +'+fmt(gain)+' монет','coin')}
+  updateMarket();checkAch()});
+
+/* ================= ЛАВКА ================= */
+const costHTML=(c,d)=>`<img src="${ICON.coin}" alt="">${fmt(c)}`+(d?` <img src="${ICON.diamond}" alt="">${d}`:'');
+function buildShop(){let h='<div class="card"><h3>Кирки</h3>';
+  PICKS.forEach((p,i)=>{let r;if(i<S.pick)r='<span class="tag">Есть</span>';else if(i===S.pick)r='<span class="tag">В руках</span>';else if(i===S.pick+1)r=`<button class="btn" data-a="pick" data-c="${p.c}" data-d="${p.dia}">${costHTML(p.c,p.dia)}</button>`;else r='<span class="tag dim">Закрыто</span>';
+    h+=`<div class="row ${i===S.pick?'cur':''}">${img('pick'+i,'ic')}<div class="tx"><b>${p.n}</b><small>Урон ${p.d}</small></div>${r}</div>`});
+  h+='</div><div class="card"><h3>Улучшения</h3>';
+  UPG.forEach(u=>{const l=S[u.id],cs=u.cost(l),pips=Array.from({length:u.max},(_,k)=>`<i class="${k<l?'on':''}"></i>`).join('');
+    h+=`<div class="row">${img(u.ic,'ic')}<div class="tx"><b>${u.n}</b><small>${u.ds(l)}</small><div class="pips">${pips}</div></div>${l>=u.max?'<span class="tag">МАКС</span>':`<button class="btn" data-a="upg" data-id="${u.id}" data-c="${cs.c}" data-d="${cs.d}">${costHTML(cs.c,cs.d)}</button>`}</div>`});
+  h+='</div>';$('tab-shop').innerHTML=h;refreshAfford()}
+function refreshAfford(){document.querySelectorAll('#tab-shop [data-c]').forEach(b=>{b.disabled=!(S.coins>=+b.dataset.c&&S.diamond>=+b.dataset.d)})}
+$('tab-shop').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;ac();const c=+b.dataset.c,d=+b.dataset.d;if(S.coins<c||S.diamond<d){sfx.err();return}
+  if(b.dataset.a==='pick'){S.coins-=c;S.diamond-=d;S.pick++;toast(PICKS[S.pick].n+' куплена!','pick'+S.pick)}
+  else{const u=UPG.find(x=>x.id===b.dataset.id);if(!u||S[u.id]>=u.max)return;S.coins-=c;S.diamond-=d;S[u.id]++;toast(u.n+': ур. '+S[u.id],u.ic)}
+  sfx.level();buildShop();buildMineInfo();checkAch();save()});
+
+/* ================= ПРОГРЕСС ================= */
+function buildProg(){const st=S.stats;
+  const rows=[['Сломано блоков',fmt(st.blocks)],['Раундов сыграно',st.rounds],['Лучший раунд (блоков)',st.best],['Максимальное комбо',st.maxCombo],['Слитков выплавлено',fmt(st.ingots)],['Подорвано TNT',st.tnt],['Монет заработано',fmt(st.coinsEarned)],['Товаров продано',fmt(st.sold)]];
+  let h='<div class="card"><h3>Статистика</h3>'+rows.map(r=>`<div class="stat"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')+'</div><div class="card"><h3>Достижения ('+ACH.filter(a=>S.ach[a.id]).length+'/'+ACH.length+')</h3>';
+  ACH.forEach(a=>{h+=`<div class="row ach ${S.ach[a.id]?'done':''}">${img('star','ic')}<div class="tx"><b>${a.n}</b><small>${a.d}</small></div><span class="tag">+${fmt(a.r)}</span></div>`});
+  h+=`</div><div class="card"><h3>Настройки</h3><div class="btnrow" style="grid-template-columns:1fr 1fr"><button class="btn blue" data-a="snd">Звук: ${S.sound?'вкл':'выкл'}</button><button class="btn blue" data-a="exp">Экспорт</button><button class="btn blue" data-a="imp">Импорт</button><button class="btn red" data-a="reset">Сбросить игру</button></div><div id="savebox"></div></div>`;
+  $('tab-prog').innerHTML=h}
+function setSound(){$('sndBtn').textContent=S.sound?'♪ ВКЛ':'♪ ВЫКЛ'}
+$('sndBtn').onclick=()=>{S.sound=!S.sound;setSound();if(S.sound){ac();sfx.buy()}if(tab==='prog')buildProg();save()};
+$('tab-prog').addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;ac();const a=b.dataset.a,box=$('savebox');
+  if(a==='snd'){$('sndBtn').click()}
+  else if(a==='exp'){save();let s='';try{s=btoa(unescape(encodeURIComponent(JSON.stringify(S))))}catch(x){}box.innerHTML='<textarea id="sv" readonly></textarea><div class="small dim">Скопируйте код и сохраните его.</div>';$('sv').value=s;$('sv').select()}
+  else if(a==='imp'){box.innerHTML='<textarea id="sv" placeholder="Вставьте код сохранения"></textarea><button class="btn gold mt" data-a="doimp">Загрузить</button>'}
+  else if(a==='doimp'){try{const o=JSON.parse(decodeURIComponent(escape(atob($('sv').value.trim()))));if(typeof o.coins!=='number')throw 0;localStorage.setItem(KEY,JSON.stringify(o));location.reload()}catch(x){toast('Неверный код сохранения')}}
+  else if(a==='reset'){if(confirm('Удалить весь прогресс?')){try{localStorage.removeItem(KEY)}catch(x){}S=defaults();location.reload()}}});
+
+/* ================= ВКЛАДКИ ================= */
+const TABS=[['mine','Шахта','pick2'],['furnace','Печь','furnace'],['market','Рынок','coin'],['shop','Лавка','villager'],['prog','Прогресс','star']];
+$('nav').innerHTML=TABS.map(([k,n,i])=>`<button data-t="${k}">${img(i)}<span>${n}</span></button>`).join('');
+function setTab(t){tab=t;TABS.forEach(([k])=>$('tab-'+k).classList.toggle('hidden',k!==t));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  if(t==='furnace')buildFurnace();else if(t==='market')buildMarket();else if(t==='shop')buildShop();else if(t==='prog')buildProg();else{buildMineInfo();gkey=''}
+  document.querySelector('main').scrollTop=0}
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b){ac();setTab(b.dataset.t)}});
+
+/* ================= ЗАПУСК ================= */
+$('field').style.backgroundImage=`url("${ICON.grass}")`;
+(function deco(){let h='';for(let i=0;i<18;i++)h+=`<img src="${ICON['fl'+ri(0,3)]}" style="left:${rnd(2,94).toFixed(1)}%;top:${rnd(2,92).toFixed(1)}%" alt="">`;$('deco').innerHTML=h})();
+document.addEventListener('pointerdown',()=>ac(),{once:true});
+(function offline(){const dt=Math.min(Math.max(0,(Date.now()-S.last)/1000),8*3600);if(dt>30&&(S.cart>0||S.queue>0)){const o0=S.ore,i0=S.ingot;passive(dt);const dO=S.ore-o0,dI=S.ingot-i0;if(dO>0||dI>0)setTimeout(()=>toast('Пока вас не было: '+(dO>0?'+'+fmt(dO)+' руды ':'')+(dI>0?'+'+fmt(dI)+' слитков':''),'cart'),600)}lastWall=Date.now()})();
+setSound();showStart();setTab('mine');updateHeader();
+let lt=performance.now();
+function frame(t){const dt=Math.min(.08,(t-lt)/1000);lt=t;if(R&&tab==='mine')roundTick(dt);updateHUD();updateHeader();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+setInterval(wallTick,250);setInterval(priceTick,6000);setInterval(save,4000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+window.addEventListener('beforeunload',save);
+})();
+</script>
+</body>
+</html>
